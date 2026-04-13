@@ -1,0 +1,11 @@
+services:
+  polyrouter:
+    build: .
+    container_name: polyrouter
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    mem_limit: 384m
+    memswap_limit: 384m
