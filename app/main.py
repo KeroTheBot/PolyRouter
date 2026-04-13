@@ -4,7 +4,7 @@ from fastapi import FastAPI, Depends
 from contextlib import asynccontextmanager
 
 from app.auth import verify_api_key
-from app.routes import orders, health, creds
+from app.routes import orders, health, creds, balance, market
 
 logging.basicConfig(
     level=logging.INFO,
@@ -27,3 +27,5 @@ app = FastAPI(
 app.include_router(health.router)
 app.include_router(orders.router, prefix="/api", dependencies=[Depends(verify_api_key)])
 app.include_router(creds.router, prefix="/api", dependencies=[Depends(verify_api_key)])
+app.include_router(balance.router, prefix="/api", dependencies=[Depends(verify_api_key)])
+app.include_router(market.router, prefix="/api", dependencies=[Depends(verify_api_key)])
