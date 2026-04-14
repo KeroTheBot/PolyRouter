@@ -4,4 +4,3 @@ pydantic-settings==2.7.1
 py-clob-client==0.34.6
 py-builder-signing-sdk==0.0.2
 httpx==0.28.1
-web3==7.9.0
