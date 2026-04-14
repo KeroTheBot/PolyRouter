@@ -1,10 +1,18 @@
+import asyncio
 from typing import Optional
 
 from fastapi import APIRouter
 
-from app.clob_client import get_market_price, get_trades
+from app.clob_client import get_market_price, get_trades, get_clob_client
 
 router = APIRouter(tags=["market"])
+
+
+@router.get("/market/{condition_id}")
+async def market(condition_id: str):
+    """Get market info including YES/NO token IDs for a condition_id."""
+    client = get_clob_client()
+    return await asyncio.to_thread(client.get_market, condition_id)
 
 
 @router.get("/price/{token_id}")

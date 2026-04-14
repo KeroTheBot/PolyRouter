@@ -13,8 +13,15 @@ class OrderType(str, Enum):
     MARKET = "MARKET"
 
 
+class Outcome(str, Enum):
+    YES = "Yes"
+    NO = "No"
+
+
 class OrderRequest(BaseModel):
-    token_id: str
+    token_id: Optional[str] = None  # direct token ID (takes priority)
+    condition_id: Optional[str] = None  # market condition ID (resolved to token_id via outcome)
+    outcome: Optional[Outcome] = None  # required when using condition_id
     side: Side
     size: float  # shares for LIMIT, USD amount for MARKET BUY, shares for MARKET SELL
     price: Optional[float] = None  # required for LIMIT, ignored for MARKET

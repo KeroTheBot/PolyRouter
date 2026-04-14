@@ -1,17 +1,33 @@
+import asyncio
 from typing import Optional
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
 from app.schemas import OrderRequest, CancelRequest, OrderResponse
-from app.clob_client import place_order, cancel_order, get_orders, get_order, cancel_all_orders
+from app.clob_client import place_order, cancel_order, get_orders, get_order, cancel_all_orders, resolve_token_id
 
 router = APIRouter(tags=["orders"])
 
 
 @router.post("/order", response_model=OrderResponse)
 async def create_order(req: OrderRequest):
+    token_id = req.token_id
+
+    if not token_id:
+        if not req.condition_id or not req.outcome:
+            raise HTTPException(
+                status_code=400,
+                detail="Provide either token_id, or condition_id + outcome",
+            )
+        try:
+            token_id = await asyncio.to_thread(
+                resolve_token_id, req.condition_id, req.outcome.value
+            )
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))
+
     result = await place_order(
-        token_id=req.token_id,
+        token_id=token_id,
         side=req.side.value,
         size=req.size,
         price=req.price,

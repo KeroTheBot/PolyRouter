@@ -54,6 +54,17 @@ def derive_api_creds() -> dict:
     }
 
 
+def resolve_token_id(condition_id: str, outcome: str) -> str:
+    """Resolve a condition_id + outcome ('Yes'/'No') to a token_id."""
+    client = get_clob_client()
+    market = client.get_market(condition_id)
+    tokens = market.get("tokens", [])
+    for token in tokens:
+        if token.get("outcome", "").lower() == outcome.lower():
+            return token["token_id"]
+    raise ValueError(f"No '{outcome}' token found for condition_id={condition_id}")
+
+
 def _place_limit_order(token_id: str, side: str, size: float, price: float) -> dict:
     client = get_clob_client()
     order_args = OrderArgs(
