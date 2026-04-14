@@ -12,6 +12,11 @@ class Settings(BaseSettings):
     clob_api_secret: str = ""
     clob_api_passphrase: str = ""
 
+    # Builder API keys (gasless trading via Polymarket relayer)
+    builder_key: str = ""
+    builder_secret: str = ""
+    builder_passphrase: str = ""
+
     # Wallet private key (hex string, with or without 0x prefix)
     private_key: str = ""
 

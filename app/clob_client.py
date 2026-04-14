@@ -8,6 +8,8 @@ from py_clob_client.clob_types import (
     BalanceAllowanceParams, AssetType, OpenOrderParams, TradeParams,
 )
 from py_clob_client.order_builder.constants import BUY, SELL
+from py_builder_signing_sdk.config import BuilderConfig
+from py_builder_signing_sdk.sdk_types import BuilderApiKeyCreds
 
 from app.config import get_settings
 
@@ -29,11 +31,24 @@ def get_clob_client() -> ClobClient:
                 api_secret=settings.clob_api_secret,
                 api_passphrase=settings.clob_api_passphrase,
             )
+
+        builder_config = None
+        if settings.builder_key and settings.builder_secret:
+            builder_config = BuilderConfig(
+                local_builder_creds=BuilderApiKeyCreds(
+                    key=settings.builder_key,
+                    secret=settings.builder_secret,
+                    passphrase=settings.builder_passphrase,
+                )
+            )
+            logger.info("Builder mode enabled (gasless trading)")
+
         _client = ClobClient(
             host=settings.clob_api_url,
             key=settings.private_key,
             chain_id=settings.chain_id,
             creds=creds,
+            builder_config=builder_config,
         )
     return _client
 
