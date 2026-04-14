@@ -11,13 +11,10 @@ logger = logging.getLogger(__name__)
 def _approve_and_update() -> dict:
     client = get_clob_client()
 
-    # update_balance_allowance tells Polymarket to set/refresh the allowance.
+    # update_balance_allowance tells Polymarket to set/refresh the USDC allowance.
     # With builder auth, this goes through the relayer (gasless).
     resp_collateral = client.update_balance_allowance(
         BalanceAllowanceParams(asset_type=AssetType.COLLATERAL)
-    )
-    resp_conditional = client.update_balance_allowance(
-        BalanceAllowanceParams(asset_type=AssetType.CONDITIONAL)
     )
 
     # Verify the new state
@@ -28,7 +25,6 @@ def _approve_and_update() -> dict:
     return {
         "success": True,
         "collateral_update": resp_collateral,
-        "conditional_update": resp_conditional,
         "balance_after": balance,
     }
 
