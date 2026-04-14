@@ -24,6 +24,10 @@ class Settings(BaseSettings):
     # Wallet private key (hex string, with or without 0x prefix)
     private_key: str = ""
 
+    # Polymarket proxy wallet address (your deposit address from the website)
+    # Required for Magic Link wallets — set to your 0x... deposit address
+    funder: str = ""
+
     # Chain: 137 = Polygon mainnet, 80002 = Amoy testnet
     chain_id: int = 137
 
