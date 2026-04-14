@@ -28,6 +28,9 @@ class Settings(BaseSettings):
     # Required for Magic Link wallets — set to your 0x... deposit address
     funder: str = ""
 
+    # Signature type: 0=EOA, 1=POLY_PROXY, 2=POLY_GNOSIS_SAFE
+    sig_type: int = 1
+
     # Chain: 137 = Polygon mainnet, 80002 = Amoy testnet
     chain_id: int = 137
 
