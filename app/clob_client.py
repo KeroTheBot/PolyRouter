@@ -43,13 +43,13 @@ def get_clob_client() -> ClobClient:
             )
             logger.info("Builder mode enabled (gasless trading)")
 
-        # If funder is set, use POLY_PROXY signature type (Magic Link wallets)
+        # If funder is set, use POLY_GNOSIS_SAFE signature type (Magic Link wallets)
         sig_type = None
         funder = None
         if settings.funder:
-            sig_type = 1  # POLY_PROXY
+            sig_type = 2  # POLY_GNOSIS_SAFE
             funder = settings.funder
-            logger.info("Proxy wallet mode: funder=%s", funder)
+            logger.info("Safe wallet mode: funder=%s", funder)
 
         _client = ClobClient(
             host=settings.clob_api_url,
