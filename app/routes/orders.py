@@ -26,10 +26,31 @@ async def create_order(req: OrderRequest):
         except ValueError as e:
             raise HTTPException(status_code=400, detail=str(e))
 
+    # Resolve size: accept either `size` (shares) or `dollars` (USD amount)
+    size = req.size
+    if req.dollars is not None:
+        if req.order_type.value == "MARKET":
+            # For MARKET BUY, size IS the dollar amount already
+            size = req.dollars
+        else:
+            # For LIMIT, convert dollars to shares: shares = dollars / price
+            if req.price is None or req.price <= 0:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Price required to convert dollars to shares for LIMIT orders",
+                )
+            size = req.dollars / req.price
+
+    if size is None or size <= 0:
+        raise HTTPException(
+            status_code=400,
+            detail="Provide either size (shares) or dollars (USD amount)",
+        )
+
     result = await place_order(
         token_id=token_id,
         side=req.side.value,
-        size=req.size,
+        size=size,
         price=req.price,
         order_type=req.order_type.value,
     )

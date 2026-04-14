@@ -23,7 +23,8 @@ class OrderRequest(BaseModel):
     condition_id: Optional[str] = None  # market condition ID (resolved to token_id via outcome)
     outcome: Optional[Outcome] = None  # required when using condition_id
     side: Side
-    size: float  # shares for LIMIT, USD amount for MARKET BUY, shares for MARKET SELL
+    size: Optional[float] = None  # shares (LIMIT) or USD amount (MARKET BUY)
+    dollars: Optional[float] = None  # USD amount — auto-converts to shares using price
     price: Optional[float] = None  # required for LIMIT, ignored for MARKET
     order_type: OrderType = OrderType.LIMIT
 
