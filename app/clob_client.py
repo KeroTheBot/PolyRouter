@@ -1,6 +1,7 @@
 import asyncio
 import logging
 
+import httpx
 from py_clob_client.client import ClobClient
 from py_clob_client.clob_types import (
     ApiCreds, OrderArgs, MarketOrderArgs, OrderType as ClobOrderType,
@@ -229,4 +230,31 @@ async def get_trades(market: str | None = None, asset_id: str | None = None) -> 
         return await asyncio.to_thread(_get_trades, market, asset_id)
     except Exception as e:
         logger.exception("Failed to get trades")
+        return {"error": str(e)}
+
+
+# --- Positions (all, via Data API) ---
+
+DATA_API_URL = "https://data-api.polymarket.com"
+
+
+async def get_positions(limit: int = 100, size_threshold: float = 0) -> list | dict:
+    try:
+        client = get_clob_client()
+        wallet = client.get_address()
+        async with httpx.AsyncClient() as http:
+            resp = await http.get(
+                f"{DATA_API_URL}/positions",
+                params={
+                    "user": wallet,
+                    "limit": limit,
+                    "sizeThreshold": size_threshold,
+                    "sortBy": "CURRENT",
+                    "sortDirection": "DESC",
+                },
+            )
+            resp.raise_for_status()
+            return resp.json()
+    except Exception as e:
+        logger.exception("Failed to get positions")
         return {"error": str(e)}
