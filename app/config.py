@@ -17,6 +17,10 @@ class Settings(BaseSettings):
     builder_secret: str = ""
     builder_passphrase: str = ""
 
+    # Relayer API keys (gasless on-chain transactions: approvals, transfers, etc.)
+    relayer_key: str = ""
+    relayer_address: str = ""
+
     # Wallet private key (hex string, with or without 0x prefix)
     private_key: str = ""
 
