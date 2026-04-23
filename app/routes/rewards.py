@@ -73,3 +73,15 @@ async def get_reward_percentages():
     except Exception as exc:
         logger.error("[rewards] percentages failed: %s", exc)
         return {"error": str(exc)}
+
+
+@router.get("/rewards/user/active")
+async def get_user_active_rewards():
+    try:
+        return _call_clob_authenticated_get(
+            "/rewards/user/markets",
+            query="only_open_orders=true&signature_type=1&page_size=500",
+        )
+    except Exception as exc:
+        logger.error("[rewards] user/active failed: %s", exc)
+        return {"error": str(exc)}
