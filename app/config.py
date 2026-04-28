@@ -12,10 +12,15 @@ class Settings(BaseSettings):
     clob_api_secret: str = ""
     clob_api_passphrase: str = ""
 
-    # Builder API keys (gasless trading via Polymarket relayer)
+    # Builder API keys (HMAC — used by relayer for gasless approvals)
     builder_key: str = ""
     builder_secret: str = ""
     builder_passphrase: str = ""
+
+    # V2 builder attribution (per-order, replaces HMAC for order signing)
+    # Get from polymarket.com/settings?tab=builder
+    builder_code: str = ""
+    builder_address: str = ""
 
     # Relayer API keys (gasless on-chain transactions: approvals, transfers, etc.)
     relayer_key: str = ""

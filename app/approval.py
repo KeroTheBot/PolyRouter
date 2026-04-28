@@ -1,7 +1,7 @@
 import asyncio
 import logging
 
-from py_clob_client.clob_types import BalanceAllowanceParams, AssetType
+from py_clob_client_v2.clob_types import BalanceAllowanceParams, AssetType
 
 from app.clob_client import get_clob_client
 

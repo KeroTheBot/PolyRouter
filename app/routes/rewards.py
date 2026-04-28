@@ -2,8 +2,8 @@ import logging
 
 import httpx
 from fastapi import APIRouter
-from py_clob_client.clob_types import RequestArgs
-from py_clob_client.headers.headers import create_level_2_headers
+from py_clob_client_v2.clob_types import RequestArgs
+from py_clob_client_v2.headers.headers import create_level_2_headers
 
 from app.clob_client import get_clob_client
 

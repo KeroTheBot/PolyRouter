@@ -2,14 +2,13 @@ import asyncio
 import logging
 
 import httpx
-from py_clob_client.client import ClobClient
-from py_clob_client.clob_types import (
-    ApiCreds, OrderArgs, MarketOrderArgs, OrderType as ClobOrderType,
+from py_clob_client_v2.client import ClobClient
+from py_clob_client_v2.clob_types import (
+    ApiCreds, OrderArgsV2, MarketOrderArgsV2, OrderType as ClobOrderType,
     BalanceAllowanceParams, AssetType, OpenOrderParams, TradeParams,
+    BuilderConfig,
 )
-from py_clob_client.order_builder.constants import BUY, SELL
-from py_builder_signing_sdk.config import BuilderConfig
-from py_builder_signing_sdk.sdk_types import BuilderApiKeyCreds
+from py_clob_client_v2.order_builder.constants import BUY, SELL
 
 from app.config import get_settings
 
@@ -32,21 +31,16 @@ def get_clob_client() -> ClobClient:
                 api_passphrase=settings.clob_api_passphrase,
             )
 
+        # V2: builder attribution is per-order via builder_code field,
+        # passed once via BuilderConfig at construction
         builder_config = None
-        if settings.builder_key and settings.builder_secret:
+        if settings.builder_code:
             builder_config = BuilderConfig(
-                local_builder_creds=BuilderApiKeyCreds(
-                    key=settings.builder_key,
-                    secret=settings.builder_secret,
-                    passphrase=settings.builder_passphrase,
-                )
+                builder_code=settings.builder_code,
+                builder_address=settings.builder_address,
             )
-            logger.info("Builder mode enabled (gasless trading)")
+            logger.info("Builder mode enabled (V2 attribution)")
 
-        # If funder is set, use appropriate signature type
-        # POLY_PROXY=1 for Magic Link proxy wallets
-        # POLY_GNOSIS_SAFE=2 for Safe wallets
-        # Configurable via POLY_SIG_TYPE, defaults to POLY_PROXY
         sig_type = None
         funder = None
         if settings.funder:
@@ -56,8 +50,8 @@ def get_clob_client() -> ClobClient:
 
         _client = ClobClient(
             host=settings.clob_api_url,
-            key=settings.private_key,
             chain_id=settings.chain_id,
+            key=settings.private_key,
             creds=creds,
             signature_type=sig_type,
             funder=funder,
@@ -71,10 +65,10 @@ def derive_api_creds() -> dict:
     settings = get_settings()
     client = ClobClient(
         host=settings.clob_api_url,
-        key=settings.private_key,
         chain_id=settings.chain_id,
+        key=settings.private_key,
     )
-    creds = client.create_or_derive_api_creds()
+    creds = client.create_or_derive_api_key()
     return {
         "api_key": creds.api_key,
         "api_secret": creds.api_secret,
@@ -95,34 +89,34 @@ def resolve_token_id(condition_id: str, outcome: str) -> str:
 
 def _place_limit_order(token_id: str, side: str, size: float, price: float) -> dict:
     client = get_clob_client()
-    order_args = OrderArgs(
+    order_args = OrderArgsV2(
         token_id=token_id,
         price=price,
         size=size,
         side=SIDE_MAP[side],
     )
     signed = client.create_order(order_args)
-    resp = client.post_order(signed, orderType=ClobOrderType.GTC)
+    resp = client.post_order(signed, order_type=ClobOrderType.GTC)
     logger.info("Limit order placed: %s", resp)
     return {"success": True, "order_id": resp.get("orderID", "")}
 
 
 def _place_market_order(token_id: str, side: str, amount: float) -> dict:
     client = get_clob_client()
-    order_args = MarketOrderArgs(
+    order_args = MarketOrderArgsV2(
         token_id=token_id,
         amount=amount,
         side=SIDE_MAP[side],
     )
     signed = client.create_market_order(order_args)
-    resp = client.post_order(signed, orderType=ClobOrderType.FOK)
+    resp = client.post_order(signed, order_type=ClobOrderType.FOK)
     logger.info("Market order placed: %s", resp)
     return {"success": True, "order_id": resp.get("orderID", "")}
 
 
 def _cancel_order(order_id: str) -> dict:
     client = get_clob_client()
-    resp = client.cancel(order_id)
+    resp = client.cancel_order(order_id)
     logger.info("Order cancelled: %s", resp)
     return {"success": True, "order_id": order_id}
 
@@ -192,7 +186,7 @@ async def cancel_order(order_id: str) -> dict:
 def _get_orders(market: str | None, asset_id: str | None) -> dict:
     client = get_clob_client()
     params = OpenOrderParams(market=market, asset_id=asset_id)
-    return client.get_orders(params)
+    return client.get_open_orders(params)
 
 
 async def get_orders(market: str | None = None, asset_id: str | None = None) -> dict:
