@@ -6,7 +6,7 @@ from py_clob_client_v2.client import ClobClient
 from py_clob_client_v2.clob_types import (
     ApiCreds, OrderArgsV2, MarketOrderArgsV2, OrderType as ClobOrderType,
     BalanceAllowanceParams, AssetType, OpenOrderParams, TradeParams,
-    BuilderConfig,
+    BuilderConfig, OrderPayload,
 )
 from py_clob_client_v2.order_builder.constants import BUY, SELL
 
@@ -116,7 +116,7 @@ def _place_market_order(token_id: str, side: str, amount: float) -> dict:
 
 def _cancel_order(order_id: str) -> dict:
     client = get_clob_client()
-    resp = client.cancel_order(order_id)
+    resp = client.cancel_order(OrderPayload(orderID=order_id))
     logger.info("Order cancelled: %s", resp)
     return {"success": True, "order_id": order_id}
 
